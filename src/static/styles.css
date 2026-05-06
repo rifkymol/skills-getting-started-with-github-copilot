@@ -91,6 +91,9 @@ section h3 {
 }
 
 .activity-card .delete-icon {
+  background: none;
+  border: none;
+  padding: 0;
   color: #d32f2f;
   cursor: pointer;
   font-weight: bold;

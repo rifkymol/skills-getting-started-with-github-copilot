@@ -10,8 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/activities");
       const activities = await response.json();
 
-      // Clear loading message
+      // Clear existing content
       activitiesList.innerHTML = "";
+      activitySelect.innerHTML = "";
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -20,14 +21,63 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          <p><strong>Participants:</strong></p>
-          ${details.participants.length > 0 ? `<div class="participants-list">${details.participants.map(p => `<div class="participant" data-activity="${name}" data-email="${p}">${p} <span class="delete-icon">×</span></div>`).join('')}</div>` : '<p>No participants yet.</p>'}
-        `;
+        const heading = document.createElement("h4");
+        heading.textContent = name;
+
+        const descP = document.createElement("p");
+        descP.textContent = details.description;
+
+        const scheduleP = document.createElement("p");
+        const scheduleStrong = document.createElement("strong");
+        scheduleStrong.textContent = "Schedule: ";
+        scheduleP.appendChild(scheduleStrong);
+        scheduleP.appendChild(document.createTextNode(details.schedule));
+
+        const availP = document.createElement("p");
+        const availStrong = document.createElement("strong");
+        availStrong.textContent = "Availability: ";
+        availP.appendChild(availStrong);
+        availP.appendChild(document.createTextNode(`${spotsLeft} spots left`));
+
+        const participantsLabel = document.createElement("p");
+        const participantsStrong = document.createElement("strong");
+        participantsStrong.textContent = "Participants:";
+        participantsLabel.appendChild(participantsStrong);
+
+        activityCard.appendChild(heading);
+        activityCard.appendChild(descP);
+        activityCard.appendChild(scheduleP);
+        activityCard.appendChild(availP);
+        activityCard.appendChild(participantsLabel);
+
+        if (details.participants.length > 0) {
+          const participantsList = document.createElement("div");
+          participantsList.className = "participants-list";
+
+          details.participants.forEach((p) => {
+            const participantDiv = document.createElement("div");
+            participantDiv.className = "participant";
+            participantDiv.dataset.activity = name;
+            participantDiv.dataset.email = p;
+
+            participantDiv.appendChild(document.createTextNode(p + " "));
+
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "delete-icon";
+            removeBtn.setAttribute("aria-label", `Remove ${p} from ${name}`);
+            removeBtn.textContent = "×";
+
+            participantDiv.appendChild(removeBtn);
+            participantsList.appendChild(participantDiv);
+          });
+
+          activityCard.appendChild(participantsList);
+        } else {
+          const noParticipants = document.createElement("p");
+          noParticipants.textContent = "No participants yet.";
+          activityCard.appendChild(noParticipants);
+        }
 
         activitiesList.appendChild(activityCard);
 
